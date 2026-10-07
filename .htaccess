@@ -1,0 +1,83 @@
+# ==============================================================================
+# CONFIGURAÇÕES APACHE (.htaccess) - HOSTINGER
+# ==============================================================================
+
+# 1. FORÇAR HTTPS E 2. PADRONIZAR WWW PARA NÃO-WWW (REDIRECIONAMENTOS 301)
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Redirecionar HTTP para HTTPS
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Redirecionar www para não-www
+  RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
+  RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
+</IfModule>
+
+# 3. PÁGINA 404 PERSONALIZADA (Retorna para a home do site one-page)
+ErrorDocument 404 /index.html
+
+# 4. COMPRESSÃO GZIP/DEFLATE (MOD_DEFLATE)
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html
+  AddOutputFilterByType DEFLATE text/plain
+  AddOutputFilterByType DEFLATE text/xml
+  AddOutputFilterByType DEFLATE text/css
+  AddOutputFilterByType DEFLATE text/javascript
+  AddOutputFilterByType DEFLATE application/javascript
+  AddOutputFilterByType DEFLATE application/x-javascript
+  AddOutputFilterByType DEFLATE application/json
+  AddOutputFilterByType DEFLATE application/xml
+  AddOutputFilterByType DEFLATE image/svg+xml
+  AddOutputFilterByType DEFLATE image/x-icon
+</IfModule>
+
+# 5. CACHE DE NAVEGADOR E CACHE-BUSTING (MOD_EXPIRES & MOD_HEADERS)
+<IfModule mod_expires.c>
+  ExpiresActive On
+
+  # HTML: 0 segundos (Sem cache - reflete atualizações instantaneamente)
+  ExpiresByType text/html "access plus 0 seconds"
+
+  # CSS e JavaScript: 1 semana
+  ExpiresByType text/css "access plus 1 week"
+  ExpiresByType text/javascript "access plus 1 week"
+  ExpiresByType application/javascript "access plus 1 week"
+  ExpiresByType application/x-javascript "access plus 1 week"
+
+  # Imagens e Mídias: 1 mês
+  ExpiresByType image/webp "access plus 1 month"
+  ExpiresByType image/jpeg "access plus 1 month"
+  ExpiresByType image/jpg "access plus 1 month"
+  ExpiresByType image/png "access plus 1 month"
+  ExpiresByType image/gif "access plus 1 month"
+  ExpiresByType image/svg+xml "access plus 1 month"
+  ExpiresByType image/x-icon "access plus 1 month"
+
+  # Fontes Web: 1 mês
+  ExpiresByType font/woff "access plus 1 month"
+  ExpiresByType font/woff2 "access plus 1 month"
+  ExpiresByType application/font-woff "access plus 1 month"
+  ExpiresByType application/font-woff2 "access plus 1 month"
+</IfModule>
+
+<IfModule mod_headers.c>
+  # Forçar NO-CACHE estrito em arquivos HTML
+  <FilesMatch "\.(html|htm)$">
+    Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+  </FilesMatch>
+
+  # Cache de 1 semana para CSS e JS
+  <FilesMatch "\.(css|js)$">
+    Header set Cache-Control "max-age=604800, public"
+  </FilesMatch>
+
+  # Cache de 1 mês para Imagens e Mídias
+  <FilesMatch "\.(webp|jpg|jpeg|png|gif|svg|ico)$">
+    Header set Cache-Control "max-age=2592000, public"
+  </FilesMatch>
+</IfModule>
